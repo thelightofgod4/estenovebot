@@ -6,24 +6,39 @@ const WEBHOOK_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/
 export async function POST(request: NextRequest) {
   try {
     console.log('Bot webhook received');
-    console.log('BOT_TOKEN:', BOT_TOKEN ? 'Found' : 'Missing');
+    
+    // Check if BOT_TOKEN exists
+    if (!BOT_TOKEN) {
+      console.error('BOT_TOKEN is missing');
+      return NextResponse.json({ error: 'Bot token missing' }, { status: 500 });
+    }
     
     const update = await request.json();
-    console.log('Update:', JSON.stringify(update, null, 2));
+    console.log('Update received:', update.message?.text);
     
     // Handle /start command
     if (update.message?.text === '/start') {
       const chatId = update.message.chat.id;
-      console.log('Processing /start command for chat:', chatId);
+      console.log('Processing /start for chat:', chatId);
       
-      const result = await sendTelegramMessage(chatId, "🏥 *Estenove Saç Nakli Merkezi'ne Hoş Geldiniz!*\n\nSaç nakli konsültasyonu için aşağıdaki butona tıklayarak detaylı bilgi alabilir ve randevu oluşturabilirsiniz.", {
-        parse_mode: 'Markdown',
-        inline_keyboard: [[
-          { text: "🩺 Konsültasyon Başlat", web_app: { url: "https://estenovebot.vercel.app/" } }
-        ]]
+      // Simple message without complex formatting
+      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: "Merhaba! Estenove Saç Nakli Bot'una hoş geldiniz."
+        }),
       });
       
-      console.log('Send message result:', result);
+      const result = await response.json();
+      console.log('Telegram API response:', result);
+      
+      if (!result.ok) {
+        console.error('Telegram API error:', result);
+      }
     }
     
     return NextResponse.json({ ok: true });

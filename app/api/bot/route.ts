@@ -5,18 +5,25 @@ const WEBHOOK_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Bot webhook received');
+    console.log('BOT_TOKEN:', BOT_TOKEN ? 'Found' : 'Missing');
+    
     const update = await request.json();
+    console.log('Update:', JSON.stringify(update, null, 2));
     
     // Handle /start command
     if (update.message?.text === '/start') {
       const chatId = update.message.chat.id;
+      console.log('Processing /start command for chat:', chatId);
       
-      await sendTelegramMessage(chatId, "🏥 *Estenove Saç Nakli Merkezi'ne Hoş Geldiniz!*\n\nSaç nakli konsültasyonu için aşağıdaki butona tıklayarak detaylı bilgi alabilir ve randevu oluşturabilirsiniz.", {
+      const result = await sendTelegramMessage(chatId, "🏥 *Estenove Saç Nakli Merkezi'ne Hoş Geldiniz!*\n\nSaç nakli konsültasyonu için aşağıdaki butona tıklayarak detaylı bilgi alabilir ve randevu oluşturabilirsiniz.", {
         parse_mode: 'Markdown',
         inline_keyboard: [[
           { text: "🩺 Konsültasyon Başlat", web_app: { url: "https://estenovebot.vercel.app/" } }
         ]]
       });
+      
+      console.log('Send message result:', result);
     }
     
     return NextResponse.json({ ok: true });

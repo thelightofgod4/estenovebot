@@ -21,24 +21,14 @@ export async function POST(request: NextRequest) {
       const chatId = update.message.chat.id;
       console.log('Processing /start for chat:', chatId);
       
-      // Simple message without complex formatting
-      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: "Merhaba! Estenove Saç Nakli Bot'una hoş geldiniz."
-        }),
+      const result = await sendTelegramMessage(chatId, "🏥 *Welcome to Estenove Hair Transplant Center!*\n\nClick the button below to start your consultation and get detailed information about hair transplant procedures.", {
+        parse_mode: 'Markdown',
+        inline_keyboard: [[
+          { text: "🩺 Start Consultation", web_app: { url: "https://estenovebot.vercel.app/" } }
+        ]]
       });
       
-      const result = await response.json();
-      console.log('Telegram API response:', result);
-      
-      if (!result.ok) {
-        console.error('Telegram API error:', result);
-      }
+      console.log('Send message result:', result);
     }
     
     return NextResponse.json({ ok: true });
